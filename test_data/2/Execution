@@ -1,0 +1,2 @@
+#!/bin/bash
+./PJ3 override/network01.txt DirectedGraph 2

@@ -1,0 +1,2 @@
+#!/bin/bash
+./PJ3 override/network02.txt UndirectedGraph 1
