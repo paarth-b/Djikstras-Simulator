@@ -6,14 +6,23 @@ typedef struct TAG_VERTEX
     int pi;
     int position;
 } VERTEX;
-typedef VERTEX *PVERTEX;
+typedef VERTEX ELEMENT;
+typedef ELEMENT *PELEMENT;
 
-typedef struct TAG_NODE
+typedef struct TAG_EDGE
 {
     int index;
     int start_edge;
     int end_edge;
     double weight;
-    TAG_NODE *next;
-} NODE;
-typedef NODE *PNODE;
+    TAG_EDGE *next;
+} EDGE;
+typedef EDGE *PEDGE;
+
+typedef struct TAG_HEAP
+{
+    int capacity;
+    int size;
+    PELEMENT *H;
+} HEAP;
+typedef HEAP *PHEAP;
