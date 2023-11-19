@@ -15,10 +15,10 @@ HEAP *init(int capacity) // Create heap using int capacity
     heap->capacity = capacity;
     heap->size = 0;
 
-    heap->A = (ELEMENT **)malloc(sizeof(ELEMENT *) * capacity);
-    if (!heap->A)
-    { // If heap->A is null, print error message and return null
-        std::cerr << "Error: heap->A is null";
+    heap->H = (ELEMENT **)malloc(sizeof(ELEMENT *) * capacity);
+    if (!heap->H)
+    { // If heap->H is null, print error message and return null
+        std::cerr << "Error: heap->H is null";
         delete heap;
         return nullptr;
     }
@@ -26,10 +26,10 @@ HEAP *init(int capacity) // Create heap using int capacity
     return heap;
 }
 
-void swap(ELEMENT **a, ELEMENT **b)
+void swap(ELEMENT **H, ELEMENT **b)
 {
-    ELEMENT *temp = *a;
-    *a = *b;
+    ELEMENT *temp = *H;
+    *H = *b;
     *b = temp;
 }
 
@@ -39,19 +39,19 @@ void minHeapify(HEAP *heap, int size, int parent)
     int l = 2 * parent + 1; // Left child index
     int r = 2 * parent + 2; // Right child index
 
-    // If left child key is smaller than the root's key
-    if (l < size && heap->A[l]->key < heap->A[smallest]->key)
+    // If left child disc is smaller than the root's disc
+    if (l < size && heap->H[l]->disc < heap->H[smallest]->disc)
         smallest = l;
 
-    // If right child key is smaller than the smallest so far
-    if (r < size && heap->A[r]->key < heap->A[smallest]->key)
+    // If right child disc is smaller than the smallest so far
+    if (r < size && heap->H[r]->disc < heap->H[smallest]->disc)
         smallest = r;
 
     // If smallest is not the root
     if (smallest != parent)
     {
-        swap(&heap->A[parent], &heap->A[smallest]);
-        // printf("Swapped %lf with %lf\n", arr[parent]->key, arr[smallest]->key);
+        swap(&heap->H[parent], &heap->H[smallest]);
+        // printf("Swapped %lf with %lf\n", arr[parent]->disc, arr[smallest]->disc);
         // Recursively apply minHeapify to the affected subtree
         heap->callCounter++;
         minHeapify(heap, size, smallest);
@@ -81,7 +81,7 @@ void print(HEAP *heap) // Print heap
 
     for (int i = 0; i < heap->size; i++)
     { // Print each element in heap
-        printf("%lf\n", heap->A[i]->key);
+        printf("%lf\n", heap->H[i]->disc);
     }
 }
 
@@ -90,7 +90,7 @@ void write(HEAP *heap, FILE *fp)
     fprintf(fp, "%d\n", heap->size); // Write number of elements in heap
     for (int i = 0; i < heap->size; i++)
     { // Print each element in heap
-        fprintf(fp, "%lf\n", heap->A[i]->key);
+        fprintf(fp, "%lf\n", heap->H[i]->disc);
     }
 }
 
@@ -107,8 +107,8 @@ void read(HEAP *heap, FILE *fp, int flag)
     for (int j = 0; j < n; j++)
     { // Read each element in heap
         ELEMENT *element = (ELEMENT *)malloc(sizeof(ELEMENT));
-        fscanf(fp, "%lf", &element->key);
-        heap->A[j] = element;
+        fscanf(fp, "%lf", &element->disc);
+        heap->H[j] = element;
     }
     heap->size = n;  // Set heap->size to n
     buildHeap(heap); // Build heap
@@ -117,8 +117,8 @@ void read(HEAP *heap, FILE *fp, int flag)
     heap->callCounter = 0;
 }
 
-void insert(HEAP *heap, double *key)
-{ // Insert key into heap
+void insert(HEAP *heap, double *disc)
+{ // Insert disc into heap
     if (heap->size == heap->capacity)
     { // If heap is full, print error message and return
         std::cerr << "Error: heap is full\n";
@@ -127,8 +127,8 @@ void insert(HEAP *heap, double *key)
 
     // Create new element and insert into heap
     ELEMENT *element = (ELEMENT *)malloc(sizeof(ELEMENT));
-    element->key = *key;
-    heap->A[heap->size] = element;
+    element->disc = *disc;
+    heap->H[heap->size] = element;
     heap->size++;
 
     buildHeap(heap); // Build heap
@@ -143,11 +143,11 @@ void extractMin(HEAP *heap, int flag)
         return;
     }
 
-    fprintf(stdout, "ExtractMin: %lf\n", heap->A[0]->key);
+    fprintf(stdout, "ExtractMin: %lf\n", heap->H[0]->disc);
     // Print minimum element
 
     // Swap root with last element
-    swap(&heap->A[0], &heap->A[heap->size - 1]);
+    swap(&heap->H[0], &heap->H[heap->size - 1]);
     heap->size--; // Decrement heap size
 
     heap->callCounter++;
@@ -157,15 +157,15 @@ void extractMin(HEAP *heap, int flag)
     heap->callCounter = 0;
 }
 
-void decreaseKey(HEAP *heap, double *position, double *key)
-{ // Decrease key at position in heap
+void decreasedisc(HEAP *heap, double *position, double *disc)
+{ // Decrease disc at position in heap
     int index = static_cast<int>(*position) - 1;
-    if (index < 0 || index > heap->size || heap->A[index]->key < *key)
+    if (index < 0 || index > heap->size || heap->H[index]->disc < *disc)
     { // If position is out of bounds, print error message and return
-        std::cerr << "Error: invalid call to decreaseKey";
+        std::cerr << "Error: invalid call to decreasedisc";
         return;
     }
-    heap->A[index]->key = *key; // Set key at position to new key
+    heap->H[index]->disc = *disc; // Set disc at position to new disc
 
     buildHeap(heap); // Build heap
 }
