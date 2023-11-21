@@ -6,4 +6,6 @@
 
 void buildGraph(FILE *fp, int vertices, int edges, int flag, bool isDirected);
 
+void printGraph(int edges, int vertices);
+
 #endif // GRAPH_H

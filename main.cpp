@@ -55,6 +55,12 @@ int main(int argc, char **argv)
         {
             return 0;
         }
+
+        if (strcmp(Word, "PrintADJ") == 0)
+        {
+            printGraph(edges, vertices);
+            continue;
+        }
     }
 
     return 1;

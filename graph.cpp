@@ -63,3 +63,19 @@ void buildGraph(FILE *fp, int vertices, int edges, int flag, bool isDirected)
         enter++;
     }
 }
+
+void printGraph(int edges, int vertices)
+{
+    for (int node = 0; node < vertices; node++)
+    {
+        printf("ADJ[%d]:--> ", node);
+        for (int edge = 0; edge < adj[node].size(); edge++)
+        {
+            printf("[%d %d %.2lf]", adj[node][edge].start_edge, adj[node][edge].end_edge, adj[node][edge].weight);
+            if (adj[node][edge].next != NULL)
+                printf("-->");
+            else
+                printf("\n");
+        }
+    }
+}
