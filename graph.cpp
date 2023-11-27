@@ -6,7 +6,6 @@
 using namespace std;
 
 VERTEX *V;
-deque<EDGE> *adj;
 
 void formConnection(EDGE *edge, int flag, bool isDirected)
 {
@@ -14,24 +13,24 @@ void formConnection(EDGE *edge, int flag, bool isDirected)
     {
         if (flag == 1)
         {
-            adj[edge->start_edge].push_front(*edge);
+            V[edge->start_edge].adj.push_front(*edge);
         }
         else
         {
-            adj[edge->start_edge].push_back(*edge);
+            V[edge->start_edge].adj.push_back(*edge);
         }
     }
     else
     {
         if (flag == 1)
         {
-            adj[edge->start_edge].push_front(*edge);
-            adj[edge->end_edge].push_front(*edge);
+            V[edge->start_edge].adj.push_front(*edge);
+            V[edge->end_edge].adj.push_front(*edge);
         }
         else
         {
-            adj[edge->start_edge].push_back(*edge);
-            adj[edge->end_edge].push_back(*edge);
+            V[edge->start_edge].adj.push_back(*edge);
+            V[edge->end_edge].adj.push_back(*edge);
         }
     }
 }
@@ -43,21 +42,20 @@ void buildGraph(FILE *fp, int vertices, int edges, int flag, bool isDirected)
     double weight;
 
     V = new VERTEX[vertices];
-    adj = new deque<EDGE>[vertices];
+    printf("Final V color: %c\n", V[vertices - 1].color);
+    printf("V color: %c\n", V[0].color);
 
     while (enter < edges) // each iteration of an edge written in file
     {
-        fscanf(fp, "%d %d %d", &index, &start_vertex, &end_vertex);
-        fscanf(fp, "%lf", &weight);
+        fscanf(fp, "%d %d %d %lf", &index, &start_vertex, &end_vertex, &weight);
 
         EDGE *edge = new EDGE();
         edge->index = index;
-        edge->start_edge = start_vertex;
-        edge->end_edge = end_vertex;
+        edge->start_edge = start_vertex - 1;
+        edge->end_edge = end_vertex - 1;
         edge->weight = weight;
 
         formConnection(edge, flag, isDirected);
-        V[edge->start_edge].neighbor = adj[edge->start_edge];
 
         delete edge;
         enter++;
@@ -68,11 +66,11 @@ void printGraph(int edges, int vertices)
 {
     for (int node = 0; node < vertices; node++)
     {
-        printf("ADJ[%d]:--> ", node);
-        for (int edge = 0; edge < adj[node].size(); edge++)
+        printf("ADJ[%d]:-->", node + 1);
+        for (int edge = 0; edge < V[node].adj.size(); edge++)
         {
-            printf("[%d %d %.2lf]", adj[node][edge].start_edge, adj[node][edge].end_edge, adj[node][edge].weight);
-            if (adj[node][edge].next != NULL)
+            printf("[%d %d: %.2lf]", V[node].adj[edge].start_edge + 1, V[node].adj[edge].end_edge + 1, V[node].adj[edge].weight);
+            if (edge != V[node].adj.size() - 1)
                 printf("-->");
             else
                 printf("\n");

@@ -8,11 +8,10 @@
 int main(int argc, char **argv)
 {
     FILE *fp;
-    HEAP *heap;
     double key, position;
     int returnV, vertices, edges;
     int flag = 1;
-    bool isDirected;
+    bool isDirected = false;
     char Word[100];
 
     if (argc < 4)
@@ -27,23 +26,24 @@ int main(int argc, char **argv)
     fscanf(fp, "%d", &vertices);
     fscanf(fp, "%d", &edges);
 
+    printf("Vertices: %d\nEdges: %d\n", vertices, edges);
+
     if (strcmp(argv[2], "DirectedGraph") == 0)
     {
         isDirected = true;
     }
-    else if (strcmp(argv[2], "UndirectedGraph") == 0)
-    {
-        isDirected = false;
-    }
 
     buildGraph(fp, vertices, edges, flag, isDirected);
+
+    printf("Graph built\n");
+
     fclose(fp); // close file after reading graph
 
     while (1)
     {
         returnV = nextInstruction(Word, &key, &position);
 
-        // printf("Instruction: %s\n", Word);
+        printf("Instruction: %s\n", Word);
 
         if (returnV == 0)
         {
