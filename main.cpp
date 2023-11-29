@@ -8,13 +8,13 @@
 int main(int argc, char **argv)
 {
     FILE *fp;
-    double key, position;
+    int source, destination;
     int returnV, vertices, edges;
     int flag = 1;
     bool isDirected = false;
     char Word[100];
 
-    if (argc < 4)
+    if (argc < 4 || atoi(argv[3]) > 2)
     {
         fprintf(stderr, "Usage: %s <InputFile> <GraphType> <Flag>\n", argv[0]);
         exit(0);
@@ -26,8 +26,6 @@ int main(int argc, char **argv)
     fscanf(fp, "%d", &vertices);
     fscanf(fp, "%d", &edges);
 
-    printf("Vertices: %d\nEdges: %d\n", vertices, edges);
-
     if (strcmp(argv[2], "DirectedGraph") == 0)
     {
         isDirected = true;
@@ -35,15 +33,11 @@ int main(int argc, char **argv)
 
     buildGraph(fp, vertices, edges, flag, isDirected);
 
-    printf("Graph built\n");
-
     fclose(fp); // close file after reading graph
 
     while (1)
     {
-        returnV = nextInstruction(Word, &key, &position);
-
-        printf("Instruction: %s\n", Word);
+        returnV = nextInstruction(Word, &source, &destination);
 
         if (returnV == 0)
         {
@@ -58,7 +52,27 @@ int main(int argc, char **argv)
 
         if (strcmp(Word, "PrintADJ") == 0)
         {
-            printGraph(edges, vertices);
+            printGraph();
+            continue;
+        }
+        if (strcmp(Word, "SinglePair") == 0)
+        {
+            singlePair(source, destination);
+            continue;
+        }
+        if (strcmp(Word, "SingleSource") == 0)
+        {
+            singleSource(source);
+            continue;
+        }
+        if (strcmp(Word, "PrintLength") == 0)
+        {
+            // printLength(source, destination);
+            continue;
+        }
+        if (strcmp(Word, "PrintPath") == 0)
+        {
+            printPath(source, destination);
             continue;
         }
     }

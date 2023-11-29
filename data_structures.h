@@ -15,10 +15,10 @@ typedef struct TAG_VERTEX
     std::deque<EDGE> adj;
     int name;
     char color = 'W';
-    double disc = 0;
+    double dist = INT_MAX;
     double fin = 0;
     int pi = -1;
-    int heapPos = -1;
+    double heapPos = -1;
 } VERTEX;
 typedef VERTEX ELEMENT;
 typedef ELEMENT *PELEMENT;
@@ -35,8 +35,6 @@ typedef HEAP *PHEAP;
 typedef struct TAG_STACK
 {
     int top;
-    int capacity;
-    int size;
-    int *S;
+    VERTEX *S[100];
 } STACK;
 typedef STACK *PSTACK;
