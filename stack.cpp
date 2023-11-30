@@ -1,21 +1,26 @@
 #include "stack.h"
 
-void push(STACK stack, VERTEX *v)
+void push(STACK *stack, VERTEX *v)
 {
-    stack.S[stack.top++] = v;
+    stack->S[stack->top] = v;
+    stack->top++;
 }
 
-VERTEX *pop(STACK stack)
+VERTEX *pop(STACK *stack)
 {
-    return stack.S[stack.top--];
+    stack->top--;
+    return stack->S[stack->top];
 }
 
-VERTEX *peek(STACK stack)
+VERTEX *peek(STACK *stack)
 {
-    return stack.S[stack.top];
+    return stack->S[stack->top - 1];
 }
 
-bool isEmpty(STACK stack)
+bool isEmpty(STACK *stack)
 {
-    return stack.top == 0;
+    if (stack->top == 0)
+        return true;
+    else
+        return false;
 }

@@ -5,7 +5,7 @@
 
 HEAP *init(int capacity) // Create heap using int capacity
 {
-    HEAP *heap = (HEAP *)malloc(sizeof(HEAP)); // Allocate memory for heap
+    HEAP *heap = new HEAP(); // Allocate memory for heap
     if (!heap)
     { // If heap is null, print error message and return null
         std::cerr << "Error: Heap is null";
@@ -15,7 +15,7 @@ HEAP *init(int capacity) // Create heap using int capacity
     heap->capacity = capacity;
     heap->size = 0;
 
-    heap->H = (ELEMENT **)malloc(sizeof(ELEMENT *) * capacity);
+    heap->H = new ELEMENT *[capacity];
     if (!heap->H)
     { // If heap->H is null, print error message and return null
         std::cerr << "Error: heap->H is null";
@@ -159,8 +159,6 @@ void decreaseKey(HEAP *heap, VERTEX *v, double *dist)
         return;
     }
     heap->H[index]->dist = *dist; // Set dist at position to new dist
-
-    print(heap);
 
     buildHeap(heap); // Build heap
 }

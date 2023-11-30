@@ -1,4 +1,5 @@
 #include <deque>
+#include <cfloat>
 
 typedef struct TAG_EDGE
 {
@@ -14,11 +15,8 @@ typedef struct TAG_VERTEX
 {
     std::deque<EDGE> adj;
     int name;
-    char color = 'W';
-    double dist = INT_MAX;
-    double fin = 0;
+    double dist = DBL_MAX;
     int pi = -1;
-    double heapPos = -1;
 } VERTEX;
 typedef VERTEX ELEMENT;
 typedef ELEMENT *PELEMENT;
@@ -34,7 +32,7 @@ typedef HEAP *PHEAP;
 
 typedef struct TAG_STACK
 {
-    int top;
+    int top = 0;
     VERTEX *S[100];
 } STACK;
 typedef STACK *PSTACK;
