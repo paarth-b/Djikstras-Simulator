@@ -38,7 +38,6 @@ int main(int argc, char **argv)
     while (1)
     {
         returnV = nextInstruction(Word, &source, &destination);
-
         if (returnV == 0)
         {
             fprintf(stderr, "Warning: Invalid instruction\n");
@@ -57,17 +56,17 @@ int main(int argc, char **argv)
         }
         if (strcmp(Word, "SinglePair") == 0)
         {
-            singlePair(source, destination);
+            djikstra(source, destination);
             continue;
         }
         if (strcmp(Word, "SingleSource") == 0)
         {
-            singleSource(source);
+            djikstra(source, -1);
             continue;
         }
         if (strcmp(Word, "PrintLength") == 0)
         {
-            // printLength(source, destination);
+            printLength(source, destination);
             continue;
         }
         if (strcmp(Word, "PrintPath") == 0)

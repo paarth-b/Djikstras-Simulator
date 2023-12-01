@@ -129,7 +129,7 @@ void insert(HEAP *heap, VERTEX *element)
     heap->H[heap->size] = element;
     heap->size++;
 
-    buildHeap(heap); // Build heap
+    // buildHeap(heap); // Build heap
     heap->callCounter = 0;
 }
 
@@ -145,7 +145,7 @@ VERTEX *extractMin(HEAP *heap)
     heap->size--; // Decrement heap size
 
     heap->callCounter++;
-    minHeapify(heap, heap->size, 0); // Build heap
+    // minHeapify(heap, heap->size, 0); // Build heap
 
     return heap->H[heap->size];
 }

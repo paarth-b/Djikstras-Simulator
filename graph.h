@@ -7,6 +7,8 @@ void buildGraph(FILE *fp, int vertices, int edges, int flag, bool isDirected);
 
 void printGraph();
 
+void djikstra(int source, int destination);
+
 void singlePair(int source, int destination);
 
 void singleSource(int source);

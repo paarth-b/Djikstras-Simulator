@@ -6,6 +6,7 @@
 using namespace std;
 
 VERTEX *V;
+int pathBuilt = -1;
 int vertices, edges;
 
 void flipVertices(EDGE *edge)
@@ -81,6 +82,11 @@ void printGraph()
     for (int node = 0; node < vertices; node++)
     {
         printf("ADJ[%d]:-->", node + 1);
+        if (V[node].adj.size() == 0)
+        {
+            printf("\n");
+            continue;
+        }
         for (int edge = 0; edge < V[node].adj.size(); edge++)
         {
             printf("[%d %d: %.2lf]", V[node].adj[edge].start_edge + 1, V[node].adj[edge].end_edge + 1, V[node].adj[edge].weight);
@@ -96,25 +102,78 @@ void relax(VERTEX *u, VERTEX *v, double weight)
 {
     if (v->dist > u->dist + weight)
     {
-        // printf("U dist: %lf\n", u->dist);
         v->dist = u->dist + weight;
         v->pi = u->name;
     }
 }
 
+void djikstra(int source, int destination)
+{
+    for (int i = 0; i < vertices; i++)
+    {
+        V[i].dist = DBL_MAX;
+        V[i].pi = -1;
+    }
+
+    HEAP *queue = init(vertices);
+    // printf("Heap cap: %d\n", queue->capacity);
+
+    insert(queue, &V[source - 1]);
+    for (int i = 0; i < vertices; i++)
+    {
+        if (i != source - 1)
+            insert(queue, &V[i]);
+    }
+    // V[source - 1].dist = 0;
+    queue->H[0]->dist = 0;
+
+    // for (int i = 0; i < vertices; i++)
+    //     printf("Vertex: %d, Distance: %.2lf, Pi: %.2d\n", V[i].name, V[i].dist, V[i].pi);
+
+    while (queue->size != 0)
+    {
+        VERTEX *u = extractMin(queue);
+        if (u->name == destination)
+            break;
+        // printf("V: %d, Distance: %.2lf, Pi: %.2d\n", u->name, u->dist, u->pi);
+        for (int i = 0; i < u->adj.size(); i++)
+        {
+            VERTEX *v = &V[u->adj[i].end_edge];
+            // printf("Name: %d\n", v->name);
+            double curr_dist = v->dist;
+            // printf("Old V Dist: %lf\n", curr_dist);
+            relax(u, v, u->adj[i].weight);
+            // printf("Relaxed: %d to %d, weight %.2lf\n", u->name, v->name, u->adj[i].weight);
+            // printf("New V Dist: %lf\n", v->dist);
+            if (curr_dist > v->dist)
+                decreaseKey(queue, v, &v->dist);
+        }
+    }
+    // for (int i = 0; i < vertices; i++)
+    //     printf("Vertex: %d, Distance: %.2lf, Pi: %.2d\n", V[i].name, V[i].dist, V[i].pi);
+    pathBuilt = source;
+    delete queue;
+}
+
 void singlePair(int source, int destination)
 {
-    V[source - 1].dist = 0;
+    for (int i = 0; i < vertices; i++)
+    {
+        V[i].dist = DBL_MAX;
+        V[i].pi = -1;
+    }
     HEAP *queue = init(vertices);
+
     for (int i = 0; i < vertices; i++)
     {
         insert(queue, &V[i]);
     }
+    queue->H[0]->dist = 0;
     // print(queue);
     while (queue->size != 0)
     {
         VERTEX *u = extractMin(queue);
-        // printf("V: %d, Distance: %.2lf, Pi: %.2d, HeapPos: %lf\n", u->name, u->dist, u->pi, u->heapPos);
+        // printf("V: %d, Distance: %.2lf, Pi: %.2d\n", u->name, u->dist, u->pi);
         if (u->name == destination)
             break;
         for (int i = 0; i < u->adj.size(); i++)
@@ -130,56 +189,33 @@ void singlePair(int source, int destination)
                 decreaseKey(queue, v, &v->dist);
         }
         // for (int i = 0; i < vertices; i++)
-        //     printf("Vertex: %d, Distance: %.2lf, Pi: %.2d\n", V[i].name, V[i].dist, V[i].pi);
+        //     printf("Vertex: %d, Pi: %.2d\n", V[i].name, V[i].pi);
     }
+    pathBuilt = source;
+    delete queue;
 }
 
 void singleSource(int source)
 {
-    V[source - 1].dist = 0;
-    HEAP *queue = init(vertices);
-    for (int i = 0; i < vertices; i++)
-    {
-        insert(queue, &V[i]);
-        // cout << "inserted " << V[i].name << endl;
-    }
-    // cout << "done" << endl;
-    while (queue->size != 0)
-    {
-        VERTEX *u = extractMin(queue);
-        // cout << "extracted " << u->name << endl;
-        //  printf("V: %d, Distance: %.2lf, Pi: %.2d, HeapPos: %lf\n", u->name, u->dist, u->pi, u->heapPos);
-        for (int i = 0; i < u->adj.size(); i++)
-        {
-            VERTEX *v = &V[u->adj[i].end_edge];
-            // printf("Name: %d\n", v->name);
-            double curr_dist = v->dist;
-            // printf("Old V Dist: %lf\n", curr_dist);
-            relax(u, v, u->adj[i].weight);
-            // printf("Relaxed: %d to %d, weight %.2lf\n", u->name, v->name, u->adj[i].weight);
-            // printf("New V Dist: %lf\n", v->dist);
-            if (curr_dist > v->dist)
-                decreaseKey(queue, v, &v->dist);
-        }
-        // for (int i = 0; i < vertices; i++)
-        //     printf("Vertex: %d, Distance: %.2lf, Pi: %.2d\n", V[i].name, V[i].dist, V[i].pi);
-    }
-    delete queue;
+    djikstra(source, -1);
 }
 
 bool buildStack(int source, int destination, STACK *stack)
 {
+    // printf("Source: %d, Destination: %d\n", source, destination);
     if (destination == source)
     {
         push(stack, &V[source]);
     }
     else if (V[destination].pi < 0)
     {
+        // printf("Node: %d, Pi: %d\n", V[destination].name, V[destination].pi);
         return true;
     }
     else
     {
         int prevNode = V[destination].pi - 1;
+        // printf("PrevNode: %d\n", prevNode);
         push(stack, &V[destination]);
         if (buildStack(source, prevNode, stack))
             return true;
@@ -188,6 +224,8 @@ bool buildStack(int source, int destination, STACK *stack)
 }
 void printPath(int source, int destination)
 {
+    if (pathBuilt != source)
+        return;
     STACK *stack = new STACK();
     if (buildStack(source - 1, destination - 1, stack) == true)
     {
@@ -205,4 +243,17 @@ void printPath(int source, int destination)
         else
             printf(".\n");
     }
+}
+
+void printLength(int source, int destination)
+{
+    if (pathBuilt != source)
+        return;
+    STACK *stack = new STACK();
+    if (buildStack(source - 1, destination - 1, stack) == true)
+    {
+        printf("There is no path from %d to %d.\n", source, destination);
+        return;
+    }
+    printf("The length of the shortest path from %d to %d is:     %.2lf\n", source, destination, V[destination - 1].dist);
 }
