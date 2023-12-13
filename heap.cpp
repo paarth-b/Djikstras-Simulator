@@ -50,10 +50,12 @@ void minHeapify(HEAP *heap, int size, int parent)
     // If smallest is not the root
     if (smallest != parent)
     {
-        swap(&heap->H[parent], &heap->H[smallest]);
+        // swap(&heap->H[parent], &heap->H[smallest]);
+        VERTEX *temp = heap->H[parent];
+        heap->H[parent] = heap->H[smallest];
+        heap->H[smallest] = temp;
         // printf("Swapped %lf with %lf\n", arr[parent]->dist, arr[smallest]->dist);
         // Recursively apply minHeapify to the affected subtree
-        heap->callCounter++;
         minHeapify(heap, size, smallest);
     }
 }
@@ -134,31 +136,59 @@ void insert(HEAP *heap, VERTEX *element)
 }
 
 VERTEX *extractMin(HEAP *heap)
-{ // Extract minimum element from heap
+{                             // Extract minimum element from heap
+    VERTEX *min = heap->H[0]; // Store minimum element
     if (heap->size == 0)
     { // If heap is empty, print error message and return
         std::cerr << "Error: heap is empty\n";
     }
 
     // Swap root with last element and swap rootPos
-    swap(&heap->H[0], &heap->H[heap->size - 1]);
+    heap->H[0] = heap->H[heap->size - 1];
+    heap->H[heap->size - 1] = min;
+    heap->H[0]->heapPos = 0;
+    heap->H[heap->size - 1]->heapPos = heap->size - 1;
+
     heap->size--; // Decrement heap size
 
-    heap->callCounter++;
-    // minHeapify(heap, heap->size, 0); // Build heap
+    minHeapify(heap, heap->size - 1, 0); // Build heap
 
-    return heap->H[heap->size];
+    return min;
 }
 
-void decreaseKey(HEAP *heap, VERTEX *v, double *dist)
-{ // Decrease dist at position in heap
-    int index = v->name - 1;
-    if (index < 0 || index > heap->size || heap->H[index]->dist < *dist)
-    { // If position is out of bounds, print error message and return
-        // std::cerr << "Error: invalid call to decreaseKey";
+// void decreaseKey(HEAP *heap, VERTEX *v, double dist)
+// { // Decrease dist at position in heap
+//     if (v->name - 1 < 0 || v->name - 1 > heap->size || v->dist < dist)
+//     { // If position is out of bounds, print error message and return
+//         // std::cerr << "Error: invalid call to decreaseKey";
+//         return;
+//     }
+//     v->dist = dist; // Set dist at position to new dist
+
+//     while (v->name - 1 > 0 && heap->H[(v->name - 1) / 2]->dist > v->dist)
+//     {
+//         swap(&heap->H[(v->name - 1) / 2], &heap->H[v->name - 1]);
+//         v->name = (v->name - 1) / 2;
+//     }
+//     // buildHeap(heap); // Build heap
+// }
+
+void decreaseKey(HEAP *heap, int index, double dist)
+{
+    if (index < 0 || index > heap->size || heap->H[index]->dist < dist)
+    {
         return;
     }
-    heap->H[index]->dist = *dist; // Set dist at position to new dist
+    heap->H[index]->dist = dist;
+    while (index > 0 && heap->H[(index - 1) / 2]->dist > heap->H[index]->dist)
+    {
+        int parentPos = heap->H[(index - 1) / 2]->heapPos;
+        int childPos = heap->H[index]->heapPos;
 
-    buildHeap(heap); // Build heap
+        swap(&heap->H[(index - 1) / 2], &heap->H[index]);
+        heap->H[(index - 1) / 2]->heapPos = parentPos;
+        heap->H[index]->heapPos = childPos;
+
+        index = (index - 1) / 2;
+    }
 }

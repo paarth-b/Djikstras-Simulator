@@ -9,6 +9,6 @@ void write(HEAP *heap, FILE *fp);
 void read(HEAP *heap, FILE *fp, int flag);
 void insert(HEAP *heap, VERTEX *V);
 VERTEX *extractMin(HEAP *heap);
-void decreaseKey(HEAP *heap, VERTEX *v, double *key);
+void decreaseKey(HEAP *heap, int index, double dist);
 
 #endif

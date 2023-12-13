@@ -16,6 +16,7 @@ typedef struct TAG_VERTEX
     std::deque<EDGE> adj;
     int name;
     double dist = DBL_MAX;
+    int heapPos = -1;
     int pi = -1;
 } VERTEX;
 typedef VERTEX ELEMENT;

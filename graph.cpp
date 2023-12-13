@@ -6,7 +6,7 @@
 using namespace std;
 
 VERTEX *V;
-int pathBuilt = -1;
+int pathBuilt[2] = {-2, -2};
 int vertices, edges;
 
 void flipVertices(EDGE *edge)
@@ -17,9 +17,10 @@ void flipVertices(EDGE *edge)
     edge->end_edge = temp;
 }
 
+// Helper method to form connections between vertices when building graph
 void formConnection(EDGE *edge, int flag, bool isDirected)
 {
-    if (isDirected)
+    if (isDirected) // check if graph is directed
     {
         if (flag == 1)
         {
@@ -56,7 +57,7 @@ void buildGraph(FILE *fp, int numV, int numEdges, int flag, bool isDirected)
     int index, start_vertex, end_vertex;
     double weight;
 
-    V = new VERTEX[vertices];
+    V = new VERTEX[vertices]; // initialize vertices
     for (int i = 0; i < vertices; i++)
         V[i].name = i + 1;
 
@@ -72,24 +73,25 @@ void buildGraph(FILE *fp, int numV, int numEdges, int flag, bool isDirected)
 
         formConnection(edge, flag, isDirected);
 
-        delete edge;
         enter++;
     }
 }
 
 void printGraph()
 {
-    for (int node = 0; node < vertices; node++)
+    for (int node = 0; node < vertices; node++) // for each vertex in array
     {
         printf("ADJ[%d]:-->", node + 1);
         if (V[node].adj.size() == 0)
-        {
             printf("\n");
-            continue;
-        }
-        for (int edge = 0; edge < V[node].adj.size(); edge++)
+
+        for (int edge = 0; edge < V[node].adj.size(); edge++) // for each connecting edge
         {
-            printf("[%d %d: %.2lf]", V[node].adj[edge].start_edge + 1, V[node].adj[edge].end_edge + 1, V[node].adj[edge].weight);
+            printf("[%d %d: %.2lf]",
+                   V[node].adj[edge].start_edge + 1,
+                   V[node].adj[edge].end_edge + 1,
+                   V[node].adj[edge].weight);
+
             if (edge != V[node].adj.size() - 1)
                 printf("-->");
             else
@@ -116,116 +118,79 @@ void djikstra(int source, int destination)
     }
 
     HEAP *queue = init(vertices);
-    // printf("Heap cap: %d\n", queue->capacity);
-
-    insert(queue, &V[source - 1]);
-    for (int i = 0; i < vertices; i++)
-    {
-        if (i != source - 1)
-            insert(queue, &V[i]);
-    }
-    // V[source - 1].dist = 0;
-    queue->H[0]->dist = 0;
-
-    // for (int i = 0; i < vertices; i++)
-    //     printf("Vertex: %d, Distance: %.2lf, Pi: %.2d\n", V[i].name, V[i].dist, V[i].pi);
-
-    while (queue->size != 0)
-    {
-        VERTEX *u = extractMin(queue);
-        if (u->name == destination)
-            break;
-        // printf("V: %d, Distance: %.2lf, Pi: %.2d\n", u->name, u->dist, u->pi);
-        for (int i = 0; i < u->adj.size(); i++)
-        {
-            VERTEX *v = &V[u->adj[i].end_edge];
-            // printf("Name: %d\n", v->name);
-            double curr_dist = v->dist;
-            // printf("Old V Dist: %lf\n", curr_dist);
-            relax(u, v, u->adj[i].weight);
-            // printf("Relaxed: %d to %d, weight %.2lf\n", u->name, v->name, u->adj[i].weight);
-            // printf("New V Dist: %lf\n", v->dist);
-            if (curr_dist > v->dist)
-                decreaseKey(queue, v, &v->dist);
-        }
-    }
-    // for (int i = 0; i < vertices; i++)
-    //     printf("Vertex: %d, Distance: %.2lf, Pi: %.2d\n", V[i].name, V[i].dist, V[i].pi);
-    pathBuilt = source;
-    delete queue;
-}
-
-void singlePair(int source, int destination)
-{
-    for (int i = 0; i < vertices; i++)
-    {
-        V[i].dist = DBL_MAX;
-        V[i].pi = -1;
-    }
-    HEAP *queue = init(vertices);
 
     for (int i = 0; i < vertices; i++)
     {
         insert(queue, &V[i]);
+        V[i].heapPos = i;
     }
-    queue->H[0]->dist = 0;
-    // print(queue);
+
+    decreaseKey(queue, source - 1, 0);
+
     while (queue->size != 0)
     {
         VERTEX *u = extractMin(queue);
-        // printf("V: %d, Distance: %.2lf, Pi: %.2d\n", u->name, u->dist, u->pi);
+
         if (u->name == destination)
+        {
+            pathBuilt[0] = source;
+            pathBuilt[1] = destination;
             break;
+        }
+
         for (int i = 0; i < u->adj.size(); i++)
         {
             VERTEX *v = &V[u->adj[i].end_edge];
-            // printf("Name: %d\n", v->name);
-            double curr_dist = v->dist;
-            // printf("Old V Dist: %lf\n", curr_dist);
-            relax(u, v, u->adj[i].weight);
-            // printf("Relaxed: %d to %d, weight %.2lf\n", u->name, v->name, u->adj[i].weight);
-            // printf("New V Dist: %lf\n", v->dist);
-            if (curr_dist > v->dist)
-                decreaseKey(queue, v, &v->dist);
-        }
-        // for (int i = 0; i < vertices; i++)
-        //     printf("Vertex: %d, Pi: %.2d\n", V[i].name, V[i].pi);
-    }
-    pathBuilt = source;
-    delete queue;
-}
 
-void singleSource(int source)
-{
-    djikstra(source, -1);
+            double curr_dist = v->dist;
+
+            relax(u, v, u->adj[i].weight);
+
+            if (curr_dist > v->dist)
+                decreaseKey(queue, v->heapPos, v->dist);
+        }
+    }
+
+    pathBuilt[0] = source;
+    pathBuilt[1] = destination;
+    delete queue;
 }
 
 bool buildStack(int source, int destination, STACK *stack)
 {
-    // printf("Source: %d, Destination: %d\n", source, destination);
     if (destination == source)
-    {
         push(stack, &V[source]);
-    }
+
     else if (V[destination].pi < 0)
-    {
-        // printf("Node: %d, Pi: %d\n", V[destination].name, V[destination].pi);
         return true;
-    }
+
     else
     {
         int prevNode = V[destination].pi - 1;
-        // printf("PrevNode: %d\n", prevNode);
         push(stack, &V[destination]);
         if (buildStack(source, prevNode, stack))
             return true;
     }
     return false;
 }
+
+bool checkEnds(int source, int destination)
+{
+    bool destExists = true;
+    if (destination != pathBuilt[1] && pathBuilt[1] != -1)
+        destExists = false;
+
+    if (pathBuilt[0] != source || destExists == false)
+        return false;
+    else
+        return true;
+}
+
 void printPath(int source, int destination)
 {
-    if (pathBuilt != source)
+    if (checkEnds(source, destination) == false)
         return;
+
     STACK *stack = new STACK();
     if (buildStack(source - 1, destination - 1, stack) == true)
     {
@@ -237,7 +202,8 @@ void printPath(int source, int destination)
     while (!isEmpty(stack))
     {
         VERTEX *v = pop(stack);
-        printf("[%d:    %.2lf]", v->name, v->dist);
+
+        printf("[%d:%8.2lf]", v->name, v->dist);
         if (!isEmpty(stack))
             printf("-->");
         else
@@ -247,13 +213,15 @@ void printPath(int source, int destination)
 
 void printLength(int source, int destination)
 {
-    if (pathBuilt != source)
+    if (checkEnds(source, destination) == false)
         return;
+
     STACK *stack = new STACK();
     if (buildStack(source - 1, destination - 1, stack) == true)
     {
         printf("There is no path from %d to %d.\n", source, destination);
         return;
     }
-    printf("The length of the shortest path from %d to %d is:     %.2lf\n", source, destination, V[destination - 1].dist);
+    printf("The length of the shortest path from %d to %d is:     %.2lf\n",
+           source, destination, V[destination - 1].dist);
 }
